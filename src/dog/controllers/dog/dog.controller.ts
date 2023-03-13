@@ -20,8 +20,11 @@ export class DogController {
   }
 
   @Get()
-  find(@Query('breed') breed?: string, @Query('age') age?: number) {
-    return this.dogService.find(breed, age);
+  find(@Query('breed') breed: string, @Query('age') age: number) {
+    if (age || breed) {
+      return this.dogService.find(breed, age);
+    }
+    return this.dogService.findAll();
   }
 
   @Post()
