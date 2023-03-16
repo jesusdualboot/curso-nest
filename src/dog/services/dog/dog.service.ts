@@ -1,54 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { DOGS } from 'datasource/dogs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Dog } from 'src/entities';
+import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
+import { CreateDogDto } from 'src/dog/dto/create-dog.dto';
+import { UpdateDogDto } from 'src/dog/dto/update-dog.dto';
 
 @Injectable()
 export class DogService {
-  findOne(dogId: number) {
-    return DOGS.filter((dog) => dog.id == dogId)[0];
+  constructor(
+    @InjectRepository(Dog) private readonly dogRepository: Repository<Dog>,
+  ) {}
+
+  async findOne(dogId: number) {
+    return await this.dogRepository.findOneBy({ id: dogId });
   }
 
-  find(breed: string, age: number) {
-    let filteredDogs = [];
-
-    if (breed && age) {
-      return DOGS.filter((dog) => dog.breed == breed && dog.age >= age);
-    }
-
-    breed
-      ? (filteredDogs = DOGS.filter((dog) => dog.breed == breed))
-      : (filteredDogs = DOGS.filter((dog) => dog.age >= age));
-
-    return filteredDogs;
-  }
-
-  findAll() {
-    return DOGS;
-  }
-
-  create(breed: string, age: number, color: string) {
-    const lastDog = DOGS.pop();
-    const newDog = {
-      id: lastDog.id + 1,
-      breed,
-      age,
-      color,
-    };
-    DOGS.push(newDog);
-    return newDog;
-  }
-
-  update(dogId: number, age: number) {
-    const updDog = DOGS.filter((dog) => dog.id == dogId)[0];
-    if (updDog) {
-      updDog['age'] = age;
-    }
-    return updDog;
-  }
-
-  delete(id: number) {
-    DOGS.forEach((item, index) => {
-      if (item.id === id) DOGS.splice(index, 1);
+  async find(breed: string, age: number) {
+    const where: FindOptionsWhere<Dog>[] = [];
+    if (breed) where.push({ breed });
+    if (age) where.push({ age });
+    const filteredDog = await this.dogRepository.findOne({
+      where,
     });
-    return 'Dog deleted successfully';
+    if (filteredDog) return filteredDog;
+  }
+
+  async findAll() {
+    return await this.dogRepository.find();
+  }
+
+  create(createDogDto: CreateDogDto) {
+    const newDog = this.dogRepository.create(createDogDto);
+    return this.dogRepository.save(newDog);
+  }
+
+  update(updateDogDto: UpdateDogDto, idDog: number) {
+    return this.dogRepository.save({
+      id: idDog,
+      ...updateDogDto,
+    });
+  }
+
+  delete(idDog: number) {
+    return this.dogRepository.delete({ id: idDog });
   }
 }
