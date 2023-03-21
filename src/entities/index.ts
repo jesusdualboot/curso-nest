@@ -1,6 +1,7 @@
 import { Dog } from './dog.entity';
+import { Owner } from './owner.entity';
 
-const entities = [Dog];
+const entities = [Dog, Owner];
 
-export { Dog };
+export { Dog, Owner };
 export default entities;
