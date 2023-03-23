@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DOGS } from 'datasource/dogs';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Dog } from 'src/entities';
+import { Dog, Owner } from 'src/entities';
 import { FindOptionsWhere, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateDogDto } from 'src/dog/dto/create-dog.dto';
 import { UpdateDogDto } from 'src/dog/dto/update-dog.dto';
@@ -10,6 +10,8 @@ import { UpdateDogDto } from 'src/dog/dto/update-dog.dto';
 export class DogService {
   constructor(
     @InjectRepository(Dog) private readonly dogRepository: Repository<Dog>,
+    @InjectRepository(Owner)
+    private readonly ownerRepository: Repository<Owner>,
   ) {}
 
   async findOne(dogId: number) {
